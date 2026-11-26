@@ -10,7 +10,7 @@ const backgrounds = {
  gradient:["#245477","#142033"], dark:["#26384b","#080d16"], warm:["#9b675c","#382d35"], mint:["#527b8c","#142d3b"]
 };
 const toast = (message) => { const el=$("#toast"); el.textContent=message; el.classList.add("show"); clearTimeout(toast.timer); toast.timer=setTimeout(()=>el.classList.remove("show"),2800); };
-const api = async (path, body, timeout=90000) => {
+const api = async (path, body, timeout=160000) => {
  const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),timeout);
  try { const res=await fetch(API_BASE+path,{method:body?"POST":"GET",headers:body?{"Content-Type":"application/json"}:{},body:body?JSON.stringify(body):undefined,signal:controller.signal}); const data=await res.json().catch(()=>({error:"Сервер вернул не JSON"})); if(!res.ok) throw new Error(data.error||data.message||`Ошибка API: ${res.status}`); return data; }
  catch(e){ if(e.name==="AbortError") throw new Error("Сервер не ответил вовремя. Попробуй ещё раз."); throw e; } finally { clearTimeout(timer); }
