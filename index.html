@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090b12">
+  <meta name="description" content="VideoClipzy — AI-сценарии и визуальный редактор коротких видео.">
+  <title>VideoClipzy — AI Video Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="VideoClipzy">
+        <span class="brand-mark"><span></span><span></span><span></span></span>
+        <span>video<span class="brand-accent">clipzy</span></span>
+        <span class="beta">STUDIO</span>
+      </a>
+      <div class="topbar-center"><span class="live-dot"></span><span id="apiStatus">Проверяем AI-сервер…</span></div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" id="importBtn">Импорт проекта</button>
+        <button class="btn btn-ghost btn-sm" id="exportProjectBtn">Экспорт JSON</button>
+        <button class="btn btn-primary btn-sm" id="renderTopBtn"><span>↗</span> Экспорт видео</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="sidebar left-sidebar">
+        <div class="side-heading"><span>РАБОЧЕЕ ПРОСТРАНСТВО</span><button class="icon-btn" title="Новый проект" id="newProjectBtn">＋</button></div>
+        <div class="project-card">
+          <div class="project-icon">▶</div>
+          <div class="project-meta"><strong id="projectName">Мой первый ролик</strong><small>Локальный проект</small></div>
+          <span class="more">•••</span>
+        </div>
+        <div class="side-heading section-gap"><span>ИНСТРУМЕНТЫ</span></div>
+        <nav class="tool-nav">
+          <button class="nav-item active" data-panel="director"><span class="nav-icon">✦</span> AI-сценарист <kbd>1</kbd></button>
+          <button class="nav-item" data-panel="scenes"><span class="nav-icon">▤</span> Сцены <kbd>2</kbd></button>
+          <button class="nav-item" data-panel="media"><span class="nav-icon">▧</span> Медиатека <kbd>3</kbd></button>
+          <button class="nav-item" data-panel="style"><span class="nav-icon">◈</span> Дизайн <kbd>4</kbd></button>
+          <button class="nav-item" data-panel="audio"><span class="nav-icon">♫</span> Звук <kbd>5</kbd></button>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="tip-card"><div class="tip-spark">✧</div><strong>Создавай быстрее</strong><p>Опиши идею — AI подготовит структуру ролика и текст для каждой сцены.</p><button id="tipAction">Попробовать <span>→</span></button></div>
+          <div class="user-row"><div class="avatar">V</div><div><strong>VideoClipzy</strong><small>Creative workspace</small></div><span class="more">•••</span></div>
+        </div>
+      </aside>
+
+      <section class="main-area">
+        <div class="editor-heading">
+          <div><div class="eyebrow">AI VIDEO WORKSPACE <span class="heading-line"></span> <span id="saveState">Все изменения локально</span></div><h1>Создай видео <span>с идеей в голове.</span></h1></div>
+          <div class="heading-tools"><button class="round-tool" id="undoBtn" title="Отменить">↶</button><button class="round-tool" id="redoBtn" title="Повторить">↷</button><button class="round-tool" id="helpBtn" title="Подсказка">?</button></div>
+        </div>
+
+        <div class="editor-grid">
+          <section class="control-column">
+            <div class="panel active-panel" id="panel-director">
+              <div class="panel-title"><div><span class="panel-icon purple">✦</span><div><h2>AI-сценарист</h2><p>Из идеи — в готовую структуру ролика</p></div></div><span class="ai-chip">GEMINI AI</span></div>
+              <label class="field-label" for="ideaInput">О чём будет видео?</label>
+              <textarea id="ideaInput" class="idea-input" rows="4" placeholder="Например: 5 привычек, которые помогают просыпаться бодрым. Динамично, с ярким hook и понятным призывом к действию…"></textarea>
+              <div class="field-row"><label class="field-label">Формат видео</label><span class="muted-label">Выбери площадку</span></div>
+              <div class="format-options" id="formatOptions">
+                <button class="format-option selected" data-ratio="9:16"><span class="ratio-icon portrait"></span><span><b>9:16</b><small>Reels / TikTok</small></span><i>✓</i></button>
+                <button class="format-option" data-ratio="16:9"><span class="ratio-icon landscape"></span><span><b>16:9</b><small>YouTube</small></span><i>✓</i></button>
+                <button class="format-option" data-ratio="1:1"><span class="ratio-icon square"></span><span><b>1:1</b><small>Лента</small></span><i>✓</i></button>
+              </div>
+              <div class="field-row"><label class="field-label">Длительность</label><strong class="value-label" id="durationValue">30 сек</strong></div>
+              <input type="range" id="durationInput" min="15" max="60" step="5" value="30" class="range-input">
+              <div class="range-scale"><span>15 сек</span><span>60 сек</span></div>
+              <div class="field-row"><label class="field-label">Стиль подачи</label></div>
+              <div class="style-chips" id="toneOptions"><button class="tone-chip selected" data-tone="Динамичный и энергичный">⚡ Динамичный</button><button class="tone-chip" data-tone="Минималистичный и чистый">◌ Минимализм</button><button class="tone-chip" data-tone="Кинематографичный">▣ Кино</button><button class="tone-chip" data-tone="Обучающий и экспертный">✳ Экспертный</button></div>
+              <button class="btn btn-primary btn-wide generate-btn" id="generateBtn"><span class="sparkle">✦</span> Сгенерировать сценарий <span class="btn-arrow">↗</span></button>
+              <p class="privacy-note"><span>◈</span> Сценарий создаётся AI через подключённый сервер. Никаких шаблонных подстановок.</p>
+            </div>
+
+            <div class="panel" id="panel-scenes">
+              <div class="panel-title"><div><span class="panel-icon blue">▤</span><div><h2>Сцены проекта</h2><p>Редактируй текст и порядок кадров</p></div></div><button class="btn btn-ghost btn-sm" id="addSceneBtn">＋ Добавить</button></div>
+              <div id="sceneList" class="scene-list"></div>
+              <div class="empty-hint" id="sceneEmpty">Сгенерируй сценарий или добавь первую сцену.</div>
+            </div>
+
+            <div class="panel" id="panel-media">
+              <div class="panel-title"><div><span class="panel-icon green">▧</span><div><h2>Медиатека</h2><p>Изображения для сцен проекта</p></div></div></div>
+              <label class="upload-zone" for="photoInput"><span class="upload-symbol">↑</span><strong>Загрузи фотографии</strong><small>JPG, PNG, WebP · до 10 файлов</small><span class="btn btn-secondary btn-sm">Выбрать файлы</span></label>
+              <input type="file" id="photoInput" accept="image/*" multiple hidden>
+              <div class="media-grid" id="mediaGrid"></div>
+              <p class="privacy-note">Изображения обрабатываются в браузере и не отправляются на сервер без запроса AI.</p>
+            </div>
+
+            <div class="panel" id="panel-style">
+              <div class="panel-title"><div><span class="panel-icon orange">◈</span><div><h2>Визуальный стиль</h2><p>Цвета, фон и типографика</p></div></div></div>
+              <label class="field-label">Цвет акцента</label><div class="swatches" id="colorOptions"><button class="swatch selected" data-color="#a78bfa" style="--swatch:#a78bfa"></button><button class="swatch" data-color="#54d6bd" style="--swatch:#54d6bd"></button><button class="swatch" data-color="#ff9b71" style="--swatch:#ff9b71"></button><button class="swatch" data-color="#78a9ff" style="--swatch:#78a9ff"></button><button class="swatch" data-color="#f5cf68" style="--swatch:#f5cf68"></button><input type="color" id="customColor" value="#a78bfa" title="Свой цвет"></div>
+              <label class="field-label spaced-label">Фон сцены</label><div class="background-options" id="backgroundOptions"><button class="bg-option selected" data-bg="gradient"><span class="bg-thumb gradient-bg"></span><small>Градиент</small></button><button class="bg-option" data-bg="dark"><span class="bg-thumb dark-bg"></span><small>Тёмный</small></button><button class="bg-option" data-bg="warm"><span class="bg-thumb warm-bg"></span><small>Тёплый</small></button><button class="bg-option" data-bg="mint"><span class="bg-thumb mint-bg"></span><small>Мятный</small></button></div>
+              <label class="field-label spaced-label" for="fontSelect">Шрифт</label><select class="select-input" id="fontSelect"><option value="Manrope">Manrope</option><option value="DM Sans">DM Sans</option><option value="Arial">Arial</option><option value="Georgia">Georgia</option></select>
+              <label class="field-label spaced-label" for="animationSelect">Анимация текста</label><select class="select-input" id="animationSelect"><option value="rise">Плавное появление</option><option value="pop">Увеличение</option><option value="slide">Сдвиг сбоку</option><option value="none">Без анимации</option></select>
+            </div>
+
+            <div class="panel" id="panel-audio">
+              <div class="panel-title"><div><span class="panel-icon pink">♫</span><div><h2>Звук и озвучка</h2><p>Голос и музыкальное сопровождение</p></div></div></div>
+              <label class="field-label" for="voiceSelect">Голос Gemini</label><select class="select-input" id="voiceSelect"><option value="Kore">Kore — женский, уверенный</option><option value="Puck">Puck — энергичный</option><option value="Charon">Charon — глубокий</option><option value="Aoede">Aoede — мягкий</option><option value="Fenrir">Fenrir — выразительный</option></select>
+              <label class="field-label spaced-label" for="voiceText">Текст для озвучки</label><textarea class="text-input" id="voiceText" rows="4" placeholder="Текст будет взят из сценария или введён вручную…"></textarea>
+              <button class="btn btn-secondary btn-wide" id="ttsBtn">♫ Создать AI-озвучку</button>
+              <div id="audioResult" class="audio-result"></div>
+              <div class="divider"></div>
+              <label class="field-label" for="musicInput">Фоновая музыка</label><input class="file-input" type="file" id="musicInput" accept="audio/*">
+              <audio id="musicPlayer" controls hidden></audio>
+              <p class="privacy-note">Генерация голоса требует доступного Gemini TTS на сервере.</p>
+            </div>
+          </section>
+
+          <section class="preview-column">
+            <div class="preview-toolbar"><div class="preview-label"><span class="preview-live"></span> ПРЕДПРОСМОТР <span class="preview-separator">/</span><span id="previewRatio">9:16</span></div><div class="preview-actions"><button class="preview-icon" id="fitBtn" title="Подогнать">⤢</button><button class="preview-icon" id="fullscreenBtn" title="На весь экран">⛶</button></div></div>
+            <div class="preview-stage" id="previewStage">
+              <div class="video-frame ratio-9-16" id="videoFrame">
+                <canvas id="previewCanvas" width="720" height="1280"></canvas>
+                <div class="frame-overlay"><span class="frame-brand">VIDEOCLIPZY <i>✦</i></span><span class="frame-counter" id="frameCounter">01 / 01</span></div>
+                <button class="play-button" id="playBtn" aria-label="Воспроизвести">▶</button>
+                <div class="frame-subtitle" id="frameSubtitle">Твой следующий ролик начинается здесь.</div>
+              </div>
+            </div>
+            <div class="timeline">
+              <div class="timeline-head"><div><strong>Таймлайн</strong><span id="timelineDuration">00:30</span></div><button class="btn btn-ghost btn-xs" id="addTimelineScene">＋ Сцена</button></div>
+              <div class="timeline-track" id="timelineTrack"><div class="timeline-empty">Сцены появятся здесь после генерации</div></div>
+              <div class="timeline-foot"><span>00:00</span><span id="timelineEnd">00:30</span></div>
+            </div>
+            <div class="export-strip"><div><strong>Готов к экспорту?</strong><small>Запиши предпросмотр в видеофайл</small></div><button class="btn btn-primary" id="exportBtn">Экспорт видео <span>↗</span></button></div>
+          </section>
+        </div>
+      </section>
+    </main>
+    <div class="toast" id="toast" role="status"></div>
+    <div class="modal-backdrop" id="exportModal" hidden><div class="modal"><button class="modal-close" id="closeModal">×</button><div class="modal-icon">✦</div><h2>Экспорт видео</h2><p id="exportMessage">Подготовка записи…</p><div class="progress-track"><div class="progress-bar" id="exportProgress"></div></div><div class="modal-actions"><button class="btn btn-ghost" id="cancelExportBtn">Отмена</button></div></div></div>
+    <input type="file" id="projectInput" accept="application/json,.json" hidden>
+  </div>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
