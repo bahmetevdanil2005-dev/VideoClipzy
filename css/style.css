@@ -13,3 +13,9 @@
 .preview-panel{background:linear-gradient(155deg,#122238 0%,#0b1422 75%)}
 .stage{background:radial-gradient(ellipse at 50% 45%,#1b2e49 0%,#09111e 72%);border-color:#30465d}
 @media(prefers-reduced-motion:reduce){.play-btn,.primary,.secondary,.play-wide{transition:none}}
+
+/* Video typography and clean cinematic frame */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+.video-frame{font-family:'Montserrat',sans-serif}
+.video-frame .frame-top,.video-frame .frame-bottom{display:none!important}
+.video-frame canvas{font-family:'Montserrat',sans-serif}
