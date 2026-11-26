@@ -1,5 +1,5 @@
-const DEFAULT_MODEL = "gemini-2.5-flash";
-const MODELS = [DEFAULT_MODEL, "gemini-2.0-flash"];
+const DEFAULT_MODEL = "gemini-3.8-flash";
+const MODELS = [DEFAULT_MODEL];
 const JSON_HEADERS = {"content-type":"application/json; charset=utf-8","cache-control":"no-store"};
 const corsHeaders = origin => ({
  "access-control-allow-origin": origin || "*",
