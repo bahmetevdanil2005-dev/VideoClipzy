@@ -1,40 +1,39 @@
-# VideoClipzy
+# VideoClipzy — Этап 1
 
-AI-редактор коротких видео: сценарии Gemini, сцены, фотографии, оформление, озвучка и экспорт WebM.
+Первый этап проекта: генерация AI-сценария и визуальный предпросмотр сцен.
 
-## Структура
+## Что реализовано
 
-- `index.html` — приложение.
-- `css/style.css` — адаптивный интерфейс.
-- `js/app.js` — редактор, Canvas-превью, медиатека и экспорт.
-- `worker/worker.js` — Cloudflare Worker API.
-- `wrangler.toml` — конфигурация деплоя Worker.
+- Русскоязычный адаптивный интерфейс.
+- Настройки идеи, площадки, языка, формата кадра, длительности и стиля подачи.
+- Генерация сценария через Gemini: название, hook, 4–8 сцен, визуальные подсказки, длительность и CTA.
+- Редактирование заголовка и текста каждой сцены.
+- Canvas-предпросмотр в форматах 9:16, 16:9 и 1:1.
+- Переключение сцен, таймлайн, последовательное воспроизведение, полноэкранный просмотр и копирование сценария.
+- Проверка доступности API через `GET /health`.
 
-## Frontend
+## GitHub Pages
 
-Публикуй корень репозитория через GitHub Pages (Settings → Pages → Deploy from a branch → main → /(root)). API-адрес настроен на:
+Включи GitHub Pages в Settings → Pages → Deploy from a branch → `main` → `/(root)`.
 
-`https://video-radar-api.bahmetevdanil2005.workers.dev`
+После публикации сайт будет доступен по адресу:
 
-## Worker
+`https://bahmetevdanil2005-dev.github.io/VideoClipzy/`
 
-В репозитории находится исходник Worker. Для развертывания из этого репозитория:
+## Cloudflare Worker
 
-1. Установи Node.js и Wrangler: `npm install -g wrangler`.
-2. Выполни `wrangler login`.
-3. Укажи ключ Gemini как секрет: `wrangler secret put GEMINI_API_KEY`.
-4. Выполни `wrangler deploy`.
+Исходник: `worker/worker.js`. Конфигурация: `wrangler.toml`.
 
-Не помещай ключ Gemini в HTML, JavaScript фронтенда или Git.
+Для генерации необходим секрет `GEMINI_API_KEY` в Cloudflare Worker. Не добавляй API-ключ в файлы фронтенда или Git.
 
-## API
+Если Worker ещё не развернут с актуальным исходником:
 
-- `GET /health` — состояние сервиса и наличие серверного ключа.
-- `POST /director` — генерация сценария. JSON: `{ "idea", "ratio", "duration", "tone" }`.
-- `POST /edit` — редактирование сцены. JSON: `{ "scene", "instruction" }`.
-- `POST /tts` — генерация речи Gemini. JSON: `{ "text", "voice" }`.
-- `POST /logo` — загрузка изображения логотипа с ограниченного списка HTTPS-доменов.
+1. Установи Wrangler и выполни `npx wrangler login`.
+2. В корне проекта выполни `npx wrangler secret put GEMINI_API_KEY`.
+3. Выполни `npx wrangler deploy`.
 
-## Важно
+Фронтенд обращается к API `https://video-radar-api.bahmetevdanil2005.workers.dev`. Если у Worker другой адрес, обнови `API_BASE` в `js/app.js`.
 
-Проверка /health подтверждает доступность API, а поле `aiConfigured` показывает, установлен ли секрет. Успешная генерация требует действующего Gemini API key и доступной модели. Экспорт браузером сохраняет WebM; поддержка MP4 зависит от браузера и кодеков. Проект сохраняется локально в браузере, JSON проекта можно экспортировать и импортировать.
+## Граница этапа
+
+На этом этапе намеренно не реализуются медиатека, логотипы, озвучка, музыка, расширенный дизайн сцен и экспорт видео. Они будут отдельными этапами после проверки сценария и предпросмотра.
