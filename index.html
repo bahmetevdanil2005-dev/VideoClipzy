@@ -20,45 +20,20 @@
         <span class="beta">STUDIO</span>
       </a>
       <div class="topbar-center"><span class="live-dot"></span><span id="apiStatus">Проверяем AI-сервер…</span></div>
-      <div class="topbar-actions">
-        <button class="btn btn-ghost btn-sm" id="importBtn">Импорт проекта</button>
-        <button class="btn btn-ghost btn-sm" id="exportProjectBtn">Экспорт JSON</button>
-        <button class="btn btn-primary btn-sm" id="renderTopBtn"><span>↗</span> Экспорт видео</button>
-      </div>
+      
     </header>
 
     <main class="workspace">
-      <aside class="sidebar left-sidebar">
-        <div class="side-heading"><span>РАБОЧЕЕ ПРОСТРАНСТВО</span><button class="icon-btn" title="Новый проект" id="newProjectBtn">＋</button></div>
-        <div class="project-card">
-          <div class="project-icon">▶</div>
-          <div class="project-meta"><strong id="projectName">Мой первый ролик</strong><small>Локальный проект</small></div>
-          <span class="more">•••</span>
-        </div>
-        <div class="side-heading section-gap"><span>ИНСТРУМЕНТЫ</span></div>
-        <nav class="tool-nav">
-          <button class="nav-item active" data-panel="director"><span class="nav-icon">✦</span> AI-сценарист <kbd>1</kbd></button>
-          <button class="nav-item" data-panel="scenes"><span class="nav-icon">▤</span> Сцены <kbd>2</kbd></button>
-          <button class="nav-item" data-panel="media"><span class="nav-icon">▧</span> Медиатека <kbd>3</kbd></button>
-          <button class="nav-item" data-panel="style"><span class="nav-icon">◈</span> Дизайн <kbd>4</kbd></button>
-          <button class="nav-item" data-panel="audio"><span class="nav-icon">♫</span> Звук <kbd>5</kbd></button>
-        </nav>
-        <div class="sidebar-bottom">
-          <div class="tip-card"><div class="tip-spark">✧</div><strong>Создавай быстрее</strong><p>Опиши идею — AI подготовит структуру ролика и текст для каждой сцены.</p><button id="tipAction">Попробовать <span>→</span></button></div>
-          <div class="user-row"><div class="avatar">V</div><div><strong>VideoClipzy</strong><small>Creative workspace</small></div><span class="more">•••</span></div>
-        </div>
-      </aside>
+      
 
       <section class="main-area">
         <div class="editor-heading">
-          <div><div class="eyebrow">AI VIDEO WORKSPACE <span class="heading-line"></span> <span id="saveState">Все изменения локально</span></div><h1>Создай видео <span>с идеей в голове.</span></h1></div>
-          <div class="heading-tools"><button class="round-tool" id="undoBtn" title="Отменить">↶</button><button class="round-tool" id="redoBtn" title="Повторить">↷</button><button class="round-tool" id="helpBtn" title="Подсказка">?</button></div>
-        </div>
+          <div><div class="eyebrow">РАБОЧЕЕ ПРОСТРАНСТВО</div><h1>Создание видео</h1></div>
 
-        <div class="editor-grid">
+        <nav class="step-nav"><button class="nav-item active" data-panel="director"><b>01</b> ИИ-сценарий</button><button class="nav-item" data-panel="scenes"><b>02</b> Сцены</button><button class="nav-item" data-panel="media"><b>03</b> Медиатека</button><button class="nav-item" data-panel="style"><b>04</b> Дизайн</button><button class="nav-item" data-panel="audio"><b>05</b> Звук</button></nav><div class="library-row"><button class="library-link" id="libraryNav" data-panel="library">▦ Библиотека <small>Фоны · Анимации · Переходы · Шрифты · Эффекты</small></button></div><div class="editor-grid">
           <section class="control-column">
             <div class="panel active-panel" id="panel-director">
-              <div class="panel-title"><div><span class="panel-icon purple">✦</span><div><h2>AI-сценарист</h2><p>Из идеи — в готовую структуру ролика</p></div></div><span class="ai-chip">GEMINI AI</span></div>
+              <div class="panel-title"><div><span class="panel-icon purple">✦</span><div><h2>ИИ-сценарий</h2><p>Из идеи — в готовую структуру ролика</p></div></div><span class="ai-chip">GEMINI AI</span></div>
               <label class="field-label" for="ideaInput">О чём будет видео?</label>
               <textarea id="ideaInput" class="idea-input" rows="4" placeholder="Например: 5 привычек, которые помогают просыпаться бодрым. Динамично, с ярким hook и понятным призывом к действию…"></textarea>
               <div class="field-row"><label class="field-label">Формат видео</label><span class="muted-label">Выбери площадку</span></div>
@@ -92,13 +67,13 @@
 
             <div class="panel" id="panel-style">
               <div class="panel-title"><div><span class="panel-icon orange">◈</span><div><h2>Визуальный стиль</h2><p>Цвета, фон и типографика</p></div></div></div>
-              <label class="field-label">Цвет акцента</label><div class="swatches" id="colorOptions"><button class="swatch selected" data-color="#a78bfa" style="--swatch:#a78bfa"></button><button class="swatch" data-color="#54d6bd" style="--swatch:#54d6bd"></button><button class="swatch" data-color="#ff9b71" style="--swatch:#ff9b71"></button><button class="swatch" data-color="#78a9ff" style="--swatch:#78a9ff"></button><button class="swatch" data-color="#f5cf68" style="--swatch:#f5cf68"></button><input type="color" id="customColor" value="#a78bfa" title="Свой цвет"></div>
+              <label class="field-label">Цвет акцента</label><div class="swatches" id="colorOptions"><button class="swatch selected" data-color="#245477" style="--swatch:#245477"></button><button class="swatch" data-color="#ffffff" style="--swatch:#ffffff"></button><button class="swatch" data-color="#5b8fc4" style="--swatch:#5b8fc4"></button><button class="swatch" data-color="#d7e7f7" style="--swatch:#d7e7f7"></button><input type="color" id="customColor" value="#245477" title="Свой цвет"></div>
               <label class="field-label spaced-label">Фон сцены</label><div class="background-options" id="backgroundOptions"><button class="bg-option selected" data-bg="gradient"><span class="bg-thumb gradient-bg"></span><small>Градиент</small></button><button class="bg-option" data-bg="dark"><span class="bg-thumb dark-bg"></span><small>Тёмный</small></button><button class="bg-option" data-bg="warm"><span class="bg-thumb warm-bg"></span><small>Тёплый</small></button><button class="bg-option" data-bg="mint"><span class="bg-thumb mint-bg"></span><small>Мятный</small></button></div>
               <label class="field-label spaced-label" for="fontSelect">Шрифт</label><select class="select-input" id="fontSelect"><option value="Manrope">Manrope</option><option value="DM Sans">DM Sans</option><option value="Arial">Arial</option><option value="Georgia">Georgia</option></select>
               <label class="field-label spaced-label" for="animationSelect">Анимация текста</label><select class="select-input" id="animationSelect"><option value="rise">Плавное появление</option><option value="pop">Увеличение</option><option value="slide">Сдвиг сбоку</option><option value="none">Без анимации</option></select>
             </div>
 
-            <div class="panel" id="panel-audio">
+            <div class="panel" id="panel-library"><div class="panel-title"><div><span class="panel-icon blue">▦</span><div><h2>Библиотека</h2><p>Фоны, анимации, переходы, шрифты и эффекты</p></div></div></div><div class="library-tabs"><button class="library-tab active" data-library="backgrounds">Фоны</button><button class="library-tab" data-library="animations">Анимации</button><button class="library-tab" data-library="transitions">Переходы</button><button class="library-tab" data-library="fonts">Шрифты</button><button class="library-tab" data-library="effects">Эффекты</button></div><div id="libraryContent" class="library-content"></div></div><div class="panel" id="panel-audio">
               <div class="panel-title"><div><span class="panel-icon pink">♫</span><div><h2>Звук и озвучка</h2><p>Голос и музыкальное сопровождение</p></div></div></div>
               <label class="field-label" for="voiceSelect">Голос Gemini</label><select class="select-input" id="voiceSelect"><option value="Kore">Kore — женский, уверенный</option><option value="Puck">Puck — энергичный</option><option value="Charon">Charon — глубокий</option><option value="Aoede">Aoede — мягкий</option><option value="Fenrir">Fenrir — выразительный</option></select>
               <label class="field-label spaced-label" for="voiceText">Текст для озвучки</label><textarea class="text-input" id="voiceText" rows="4" placeholder="Текст будет взят из сценария или введён вручную…"></textarea>
