@@ -1,4 +1,4 @@
-const MODELS=["gemini-2.5-flash","gemini-2.5-flash-lite"];
+const MODELS=["gemini-3.5-flash-lite","gemini-3.8-flash"];
 const HEADERS={"content-type":"application/json; charset=utf-8","cache-control":"no-store"};
 const cors=o=>({"access-control-allow-origin":o||"*","access-control-allow-methods":"GET,POST,OPTIONS","access-control-allow-headers":"Content-Type,Authorization","access-control-max-age":"86400","vary":"Origin"});
 const out=(d,s,o)=>new Response(JSON.stringify(d),{status:s,headers:{...HEADERS,...cors(o)}});
