@@ -11,8 +11,9 @@ const motionPalettes=[["#080b24","#263b70","#25d6c8"],["#061c2c","#126b78","#a5f
 function captionBeats(scene){
  const tokens=[];const add=(v,part)=>String(v||"").split(/(\*[^*]+\*)/).filter(Boolean).forEach(seg=>{const hi=/^\*[^*]+\*$/.test(seg),raw=hi?seg.slice(1,-1):seg;raw.split(/\s+/).filter(Boolean).forEach(word=>{const m=word.match(/^(.*?)([.,;:!?…]*)$/);if(m[1])tokens.push({text:m[1]+m[2],highlight:hi,part,punc:m[2]})})});
  add(scene?.text||scene?.narration||scene?.title,0);add(scene?.subtitle,1);
- const chunks=[];let i=0;while(i<tokens.length){const first=tokens[i],want=first.text.length>=8?1:first.text.length<=2?2:(i%3===0?1:2),chunk=[first];let chars=first.text.length;
+ const chunks=[];let i=0;while(i<tokens.length){const first=tokens[i],seed=(i*9301+String(scene?.text||"").length*49297+String(scene?.subtitle||"").length*233)%233280,r=seed/233280,want=first.text.length>=7?1:first.text.length<=2?2:r<.4?1:r<.85?2:3,chunk=[first];let chars=first.text.length;
  while(chunk.length<want&&i+chunk.length<tokens.length){const prev=chunk.at(-1),next=tokens[i+chunk.length];if(/[.,;:!?…]/.test(prev.punc)||next.part!==prev.part||chars+next.text.length>17)break;chunk.push(next);chars+=next.text.length}
+ while(i+chunk.length<tokens.length&&chunk.at(-1).text.length<=2&&!/[.,;:!?…]/.test(chunk.at(-1).punc)&&tokens[i+chunk.length].part===chunk.at(-1).part&&chars<14){chunk.push(tokens[i+chunk.length]);chars+=chunk.at(-1).text.length}
  chunks.push(chunk);i+=chunk.length}return chunks;
 }
 function beatAt(scene,progress){
