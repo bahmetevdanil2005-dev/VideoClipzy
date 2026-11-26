@@ -17,7 +17,7 @@ async function gemini(env,contents,{json=false,temperature=.8,maxOutputTokens=40
  let lastError=null;
  for(const model of MODELS){
   for(let attempt=0;attempt<2;attempt++){
-   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),45000);
+   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),28000);
    try{
     const url=`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`;
     const generationConfig={maxOutputTokens,...(json?{responseMimeType:"application/json"}:{})};
