@@ -1,6 +1,6 @@
 const DEFAULT_MODEL = "gemini-3.8-flash";
 // Ordered production fallbacks: retry another supported Flash model when Google is overloaded.
-const MODELS = [DEFAULT_MODEL, "gemini-3.7-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite"];
+const MODELS = [DEFAULT_MODEL, "gemini-2.5-flash"];
 const JSON_HEADERS = {"content-type":"application/json; charset=utf-8","cache-control":"no-store"};
 const corsHeaders = origin => ({
  "access-control-allow-origin": origin || "*",
@@ -17,7 +17,7 @@ async function gemini(env,contents,{json=false,temperature=.8,maxOutputTokens=40
  let lastError=null;
  for(const model of MODELS){
   for(let attempt=0;attempt<2;attempt++){
-   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),55000);
+   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),45000);
    try{
     const url=`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`;
     const generationConfig={maxOutputTokens,...(json?{responseMimeType:"application/json"}:{})};
@@ -64,7 +64,7 @@ async function director(body,env){
 Идея: ${idea}
 Формат: ${ratio}. Длительность: около ${duration} секунд. Подача: ${tone}.
 Сделай сильный hook в первой сцене, логичное развитие и конкретный CTA. 4-8 сцен. Сумма duration должна быть близка к длительности. Не добавляй несуществующие факты.`;
- const raw=await gemini(env,[{role:"user",parts:[{text:prompt}]}],{json:true,temperature:.85});
+ const raw=await gemini(env,[{role:"user",parts:[{text:prompt}]}],{json:true,temperature:.85,maxOutputTokens:2048});
  const result=extractJson(raw);if(!Array.isArray(result.scenes)||!result.scenes.length)throw new Error("В ответе AI нет массива scenes.");
  result.scenes=result.scenes.slice(0,12).map(s=>({title:String(s.title||"Сцена").slice(0,140),text:String(s.text||"").slice(0,1200),visual:String(s.visual||"").slice(0,500),duration:Math.max(1,Math.min(30,Number(s.duration)||5))}));
  return result;
