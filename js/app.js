@@ -19,34 +19,6 @@ function beatAt(scene,progress){
  const weights=chunks.map(ch=>ch.reduce((n,w)=>n+w.text.length+1,0)+(/[.,;:!?…]/.test(ch.at(-1).punc)?2:0)),sum=weights.reduce((a,b)=>a+b,0);
  let cursor=Math.min(sum-.0001,Math.max(0,progress)*sum),base=0;for(let i=0;i<chunks.length;i++){if(cursor<base+weights[i])return {words:chunks[i],index:i,local:(cursor-base)/weights[i],part:chunks[i][0].part};base+=weights[i]}return {words:chunks.at(-1),index:chunks.length-1,local:1,part:chunks.at(-1)[0].part};
 }
-function drawThemeSignature(x,w,h,theme,t,seed,color){
- const pulse=.5+.5*Math.sin(t*.0012+seed),cx=w*(.5+.08*Math.sin(t*.00023+seed)),cy=h*(.48+.06*Math.cos(t*.00019+seed));
- x.save();x.globalCompositeOperation="screen";x.lineCap="round";x.lineJoin="round";x.strokeStyle=color;x.fillStyle=color;
- const path=(fn,width,alpha)=>{x.beginPath();for(let i=0;i<=100;i++){const u=i/100,p=fn(u);if(i===0)x.moveTo(...p);else x.lineTo(...p)}x.lineWidth=width;x.globalAlpha=alpha;x.stroke();x.globalAlpha=1};
- switch(theme){
- case 0: for(let i=0;i<6;i++){x.beginPath();x.ellipse(cx,cy,w*(.12+i*.045),h*(.07+i*.035),t*.00018,0,7);x.globalAlpha=.35;x.lineWidth=2;x.stroke()}break;
- case 1: for(let i=0;i<5;i++)path(u=>[u*w,h*(.2+i*.12+Math.sin(u*5+t*.0006+i)*.08)],w*.025,.12);break;
- case 2: for(let i=0;i<4;i++){const xx=w*(.2+i*.2),yy=h*(.25+(i%2)*.4);const r=w*(.07+i*.012);const rg=x.createRadialGradient(xx-r*.35,yy-r*.4,1,xx,yy,r);rg.addColorStop(0,"#ffffffdd");rg.addColorStop(.25,color+"aa");rg.addColorStop(1,"#11182700");x.fillStyle=rg;x.beginPath();x.arc(xx,yy,r,0,7);x.fill()}break;
- case 3: for(let i=0;i<7;i++){const xx=w*(.08+i*.14);x.beginPath();x.moveTo(xx,h*.12);x.lineTo(xx+w*.1,h*.5);x.lineTo(xx,h*.88);x.closePath();x.globalAlpha=.13;x.lineWidth=2;x.stroke()}break;
- case 4: for(let i=0;i<85;i++){const xx=(i*127.7+seed*17)%w,yy=(i*211.3+seed*31)%h,r=(i%3+1)*1.4;x.globalAlpha=.25+(i%4)*.12;x.beginPath();x.arc(xx,yy,r*(1+pulse),0,7);x.fill()}break;
- case 5: for(let i=0;i<16;i++){const yy=h*(.18+i*.045);path(u=>[u*w,yy+Math.sin(u*9+i*.4)*h*.035+Math.cos(u*4+i)*h*.02],1.5,.22)}break;
- case 6: for(let i=0;i<4;i++)path(u=>[u*w,h*(.25+i*.16)+Math.sin(u*6+t*.00035+i)*h*.13],w*.035,.11);break;
- case 7: for(let i=0;i<12;i++){x.beginPath();x.moveTo(w*.5+i*w*.035,h*.35);x.lineTo(w*.5+i*w*.13,h);x.globalAlpha=.2;x.lineWidth=1;x.stroke()}for(let i=0;i<9;i++){const yy=h*(.4+i*i*.009);x.beginPath();x.moveTo(0,yy);x.lineTo(w,yy);x.globalAlpha=.16;x.stroke()}break;
- case 8: for(let i=0;i<12;i++){x.save();x.translate(cx,cy);x.rotate(i*Math.PI/6+t*.0001);x.beginPath();x.ellipse(0,-h*.13,w*.035,h*.13,0,0,7);x.globalAlpha=.16;x.fill();x.restore()}break;
- case 9: x.beginPath();x.arc(cx,cy,w*.2,0,7);x.globalAlpha=.22;x.fill();x.globalCompositeOperation="destination-out";x.beginPath();x.arc(cx+w*.1,cy-h*.06,w*.19,0,7);x.fill();x.globalCompositeOperation="screen";x.beginPath();x.ellipse(cx,cy,w*.24,h*.22,0,0,7);x.globalAlpha=.5;x.lineWidth=3;x.stroke();break;
- case 10: for(let i=0;i<5;i++){const xx=w*(.18+i*.16),yy=h*(.35+.2*Math.sin(t*.0003+i));x.beginPath();x.arc(xx,yy,w*(.07+i*.008),0,7);x.globalAlpha=.08;x.fill()}break;
- case 11: for(let i=0;i<14;i++){const yy=h*(.12+i*.06);x.beginPath();x.moveTo(0,yy);x.lineTo(w,yy+h*.04*Math.sin(t*.0007+i));x.globalAlpha=.18;x.lineWidth=i%4===0?3:1;x.stroke()}break;
- case 12: for(let i=0;i<70;i++){const xx=(i*83.1+seed*9)%w,yy=(i*157.7+seed*13)%h,rr=(i%4+1)*1.2;x.globalAlpha=.3;x.beginPath();x.arc(xx+Math.sin(t*.0004+i)*12,yy+Math.cos(t*.0003+i)*12,rr,0,7);x.fill()}break;
- case 13: for(let i=0;i<5;i++){const xx=w*(.16+i*.17),yy=h*(.25+(i%2)*.45);x.beginPath();x.arc(xx,yy,w*(.06+i*.012),0,7);x.globalAlpha=.25;x.lineWidth=2+i%3;x.stroke()}break;
- case 14: for(let i=0;i<18;i++)path(u=>[u*w,h*(.15+i*.04+Math.sin(u*11+t*.0005+i*.3)*.025)],1.2,.22);break;
- case 15: for(let i=0;i<7;i++){const inset=i*w*.035;x.globalAlpha=.17-i*.015;x.lineWidth=2;x.strokeRect(inset,h*.18+inset,w-2*inset,h*.64-2*inset)}break;
- case 16: for(let i=0;i<8;i++){const xx=w*(.08+i*.12);x.beginPath();x.moveTo(xx,h*.12);x.lineTo(xx+w*.09,h*.2);x.lineTo(xx+w*.04,h*.82);x.lineTo(xx-w*.05,h*.75);x.closePath();x.globalAlpha=.1;x.fill()}break;
- case 17: for(let i=0;i<8;i++){const r=w*(.04+i*.055)+pulse*w*.012;x.beginPath();x.arc(cx,cy,r,0,7);x.globalAlpha=.25*(1-i*.07);x.lineWidth=2;x.stroke()}break;
- case 18: for(let i=0;i<12;i++){const yy=h*(.48+i*.035);path(u=>[u*w,yy+Math.sin(u*4+i*.3)*h*.045],w*.012,.11)}break;
- case 19: for(let i=0;i<10;i++){x.beginPath();x.arc(cx,cy,w*(.12+i*.035),Math.PI*(.08+i*.012),Math.PI*(.92-i*.012));x.globalAlpha=.25;x.lineWidth=w*.008;x.stroke()}break;
- }
- x.restore();
-}
 function drawMotionBackground(x,w,h,theme,t,seed){
  const palette=motionPalettes[((theme%3)+3)%3],base=palette[0],accent=palette[2],seconds=t/1000;
  x.save();x.globalAlpha=1;x.globalCompositeOperation="source-over";x.fillStyle=base;x.fillRect(0,0,w,h);
