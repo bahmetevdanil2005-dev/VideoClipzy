@@ -1,5 +1,6 @@
 const DEFAULT_MODEL = "gemini-3.8-flash";
-const MODELS = [DEFAULT_MODEL];
+// Ordered production fallbacks: retry another supported Flash model when Google is overloaded.
+const MODELS = [DEFAULT_MODEL, "gemini-3.7-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite"];
 const JSON_HEADERS = {"content-type":"application/json; charset=utf-8","cache-control":"no-store"};
 const corsHeaders = origin => ({
  "access-control-allow-origin": origin || "*",
@@ -12,34 +13,48 @@ function response(data,status=200,origin="*"){return new Response(JSON.stringify
 function err(message,status=400,origin="*"){return response({ok:false,error:message},status,origin);}
 async function readBody(request){const len=Number(request.headers.get("content-length")||0);if(len>2_000_000)throw new Error("Размер запроса превышает 2 МБ.");const data=await request.json();if(!data||typeof data!=="object"||Array.isArray(data))throw new Error("Ожидался JSON-объект.");return data;}
 async function gemini(env,contents,{json=false,temperature=.8,maxOutputTokens=4096}={}){
- if(!env.GEMINI_API_KEY)throw new Error("На сервере не задан секрет GEMINI_API_KEY.");
- let last;
+ if(!env.GEMINI_API_KEY)throw new Error("На сервере не задан секрет GEMINI_API_KEY. Добавь GEMINI_API_KEY в Cloudflare → Workers → Settings → Variables and Secrets.");
+ let lastError=null;
  for(const model of MODELS){
-  for(let attempt=0;attempt<3;attempt++){
-   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),45000);
+  for(let attempt=0;attempt<2;attempt++){
+   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),55000);
    try{
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({contents,generationConfig:{temperature,maxOutputTokens,...(json?{responseMimeType:"application/json"}:{})}}),signal:controller.signal});
+    const url=`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`;
+    const generationConfig={maxOutputTokens,...(json?{responseMimeType:"application/json"}:{})};
+    // Newer Gemini models manage sampling internally; omit temperature for widest compatibility.
+    if(!model.startsWith("gemini-3."))generationConfig.temperature=temperature;
+    const res=await fetch(url,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({contents,generationConfig}),signal:controller.signal});
     const data=await res.json().catch(()=>({}));
     if(!res.ok){
-     const message=data.error?.message||`Gemini API: HTTP ${res.status}`;
-     last=new Error(message);last.status=res.status;
-     if([400,401,403,404].includes(res.status))break;
-     if(![408,429,500,502,503,504].includes(res.status))break;
-     if(attempt<2){await new Promise(resolve=>setTimeout(resolve,800*(2**attempt)));continue;}
+     const detail=data.error?.message||`HTTP ${res.status}`;
+     lastError=new Error(`${model}: ${detail}`);lastError.status=res.status;
+     // Credentials/project errors won't be fixed by switching model.
+     if(res.status===401||res.status===403)throw lastError;
+     // Rate limit, overload, model access and transient server errors: try again, then fallback.
+     if([400,404,408,429,500,502,503,504].includes(res.status)){
+      if(attempt===0&&[408,429,500,502,503,504].includes(res.status)){await new Promise(r=>setTimeout(r,900));continue;}
+      break;
+     }
+     throw lastError;
+    }
+    const candidate=data.candidates?.[0];
+    const text=(candidate?.content?.parts||[]).map(p=>p.text||"").join("\n").trim();
+    if(!text){
+     const reason=candidate?.finishReason||data.promptFeedback?.blockReason||"пустой ответ";
+     lastError=new Error(`${model}: модель не вернула текст (${reason}).`);
      break;
     }
-    const text=(data.candidates||[]).flatMap(c=>c.content?.parts||[]).map(p=>p.text||"").join("\n").trim();
-    if(!text)throw new Error("Gemini вернул пустой ответ.");
     return text;
    }catch(e){
-    last=e;if(e.name==="AbortError")last=new Error("Истекло время ожидания Gemini.");
-    if(attempt<2&&(e.name==="AbortError"||!e.status)){await new Promise(resolve=>setTimeout(resolve,800*(2**attempt)));continue;}
+    lastError=e;
+    if(e.status===401||e.status===403)throw e;
+    if(e.name==="AbortError"){lastError=new Error(`${model}: превышено время ожидания ответа.`);if(attempt===0)continue;}
+    else if(!e.status&&attempt===0){await new Promise(r=>setTimeout(r,900));continue;}
     break;
    }finally{clearTimeout(timer);}
   }
-  if(last?.status&&[400,401,403,404].includes(last.status))break;
  }
- throw last||new Error("Не удалось получить ответ Gemini.");
+ throw new Error("Не удалось создать сценарий ни одной моделью Gemini. Последняя ошибка: "+(lastError?.message||"неизвестная ошибка"));
 }
 function extractJson(text){const cleaned=text.replace(/^```(?:json)?\s*/i,"").replace(/\s*```$/,"").trim();try{return JSON.parse(cleaned);}catch{}const start=cleaned.indexOf("{"),end=cleaned.lastIndexOf("}");if(start>=0&&end>start){try{return JSON.parse(cleaned.slice(start,end+1));}catch{}}throw new Error("AI вернул некорректный JSON. Попробуй повторить запрос.");}
 async function director(body,env){
@@ -94,7 +109,7 @@ export default {
  async fetch(request,env){
   const url=new URL(request.url),origin=request.headers.get("origin")||"*";
   if(request.method==="OPTIONS")return new Response(null,{status:204,headers:corsHeaders(origin)});
-  if(url.pathname==="/health"&&request.method==="GET")return response({ok:true,status:"ok",service:"VideoClipzy API",timestamp:new Date().toISOString(),aiConfigured:Boolean(env.GEMINI_API_KEY)},200,origin);
+  if(url.pathname==="/health"&&request.method==="GET")return response({ok:true,status:"ok",service:"VideoClipzy API",timestamp:new Date().toISOString(),aiConfigured:Boolean(env.GEMINI_API_KEY),models:MODELS},200,origin);
   if(request.method==="GET"&&url.pathname==="/")return response({ok:true,service:"VideoClipzy API",endpoints:["/health","/director","/edit","/tts","/logo"]},200,origin);
   if(!["POST"].includes(request.method))return err("Метод не поддерживается.",405,origin);
   try{
