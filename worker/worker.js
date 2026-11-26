@@ -15,16 +15,29 @@ async function gemini(env,contents,{json=false,temperature=.8,maxOutputTokens=40
  if(!env.GEMINI_API_KEY)throw new Error("На сервере не задан секрет GEMINI_API_KEY.");
  let last;
  for(const model of MODELS){
-  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),55000);
-  try{
-   const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({contents,generationConfig:{temperature,maxOutputTokens,...(json?{responseMimeType:"application/json"}:{})}}),signal:controller.signal});
-   const data=await res.json().catch(()=>({}));
-   if(!res.ok){last=new Error(data.error?.message||`Gemini API: HTTP ${res.status}`);if([400,401,403].includes(res.status))break;continue;}
-   const text=(data.candidates||[]).flatMap(c=>c.content?.parts||[]).map(p=>p.text||"").join("\n").trim();
-   if(!text)throw new Error("Gemini вернул пустой ответ.");
-   return text;
-  }catch(e){last=e;if(e.name==="AbortError")last=new Error("Истекло время ожидания Gemini.");}
-  finally{clearTimeout(timer);}
+  for(let attempt=0;attempt<3;attempt++){
+   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),45000);
+   try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({contents,generationConfig:{temperature,maxOutputTokens,...(json?{responseMimeType:"application/json"}:{})}}),signal:controller.signal});
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok){
+     const message=data.error?.message||`Gemini API: HTTP ${res.status}`;
+     last=new Error(message);last.status=res.status;
+     if([400,401,403,404].includes(res.status))break;
+     if(![408,429,500,502,503,504].includes(res.status))break;
+     if(attempt<2){await new Promise(resolve=>setTimeout(resolve,800*(2**attempt)));continue;}
+     break;
+    }
+    const text=(data.candidates||[]).flatMap(c=>c.content?.parts||[]).map(p=>p.text||"").join("\n").trim();
+    if(!text)throw new Error("Gemini вернул пустой ответ.");
+    return text;
+   }catch(e){
+    last=e;if(e.name==="AbortError")last=new Error("Истекло время ожидания Gemini.");
+    if(attempt<2&&(e.name==="AbortError"||!e.status)){await new Promise(resolve=>setTimeout(resolve,800*(2**attempt)));continue;}
+    break;
+   }finally{clearTimeout(timer);}
+  }
+  if(last?.status&&[400,401,403,404].includes(last.status))break;
  }
  throw last||new Error("Не удалось получить ответ Gemini.");
 }
@@ -91,6 +104,6 @@ export default {
    if(url.pathname==="/edit")return response(await edit(body,env),200,origin);
    if(url.pathname==="/tts")return response(await tts(body,env),200,origin);
    return err("Маршрут не найден.",404,origin);
-  }catch(e){return err(e.message||"Внутренняя ошибка сервера.",e.message?.includes("GEMINI_API_KEY")?503:400,origin);}
+  }catch(e){return err(e.message||"Внутренняя ошибка сервера.",e.message?.includes("GEMINI_API_KEY")||[408,429,500,502,503,504].includes(e.status)?503:400,origin);}
  }
 };
