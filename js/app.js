@@ -101,6 +101,7 @@ function renderEditor(){
  $("#totalDuration").textContent=totalSeconds()+" сек";
 }
 function sceneEditorClick(e){const card=e.target.closest(".scene-card");if(!card)return;const i=+card.dataset.index,a=e.target.closest("[data-action]")?.dataset.action;
+ if(!a){state.current=i;state.currentTime=sceneStart(i)*1000;timeline();return}
  if(a==="up"&&i>0)[state.scenes[i-1],state.scenes[i]]=[state.scenes[i],state.scenes[i-1]];
  else if(a==="down"&&i<state.scenes.length-1)[state.scenes[i+1],state.scenes[i]]=[state.scenes[i],state.scenes[i+1]];
  else if(a==="duplicate")state.scenes.splice(i+1,0,{...state.scenes[i],title:state.scenes[i].title+" — копия"});
